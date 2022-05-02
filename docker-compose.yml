@@ -1,40 +1,27 @@
 services:
 
-  bgping:
-    build:
-      context: ./bgping/.devcontainer/devcontainer.json
-      dockerfile: ./bgping/.devcontainer/dockerfile
-      args:
-        "VARIANT": "1-bullseye"
-        "NODE_VERSION": "none"
-    hostname: bgping
-    networks:
-      bird:
-        ipv4_address: 10.0.12.254
-
   router1:
     image: pierky/bird:2.0.9
     hostname: router1
     networks:
-      bird:
+      app:
         ipv4_address: 10.0.12.11
-    ports:
-      - 11179:179
     volumes:
       - ./bird/router1/:/etc/bird:rw
+  
   router2:
     image: pierky/bird:2.0.9
     hostname: router2
     networks:
-      bird:
+      app:
         ipv4_address: 10.0.12.22
-    ports:
-      - 22179:179
     volumes:
       - ./bird/router2/:/etc/bird:rw
 
+
 networks:
-  bird:
+
+  app:
     ipam:
       config:
         - subnet: 10.0.12.0/24
