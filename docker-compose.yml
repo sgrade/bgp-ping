@@ -1,3 +1,6 @@
+# Ancillary containers for easier testing:
+#   Two BIRD routers. For the configs, check "bird" directory.
+
 services:
 
   router1:
