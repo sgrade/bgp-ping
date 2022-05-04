@@ -19,6 +19,8 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 # USER vscode
 # RUN go get -x <your-dependency-or-tool>
 USER vscode
+# protoc (protobuf-compiler) is installed above with apt. In addition, the plugins for protoc are required
+# https://stackoverflow.com/questions/70935945/getting-protoc-executable-file-not-found-in-path-when-running-go-generate
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
