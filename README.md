@@ -1,7 +1,9 @@
 # bgp-ping
 Connectivity test for a BGP (Border Gateway Protocol) peer
 
-Sample report
+Original idea and some code to start from is from [https://github.com/cloverstd/tcping](https://github.com/cloverstd/tcping). Then it is being simplified for BGP and re-written as a client/server app.
+
+## Sample report of oririnal tcping and monolithic bgping
 ```
 ./bgp-ping
 Ping tcp://10.0.12.11:179(10.0.12.11:179) - Connected - time=982.225µs
@@ -15,3 +17,6 @@ Ping statistics tcp://10.0.12.11:179
 Approximate trip times:
         Minimum = 345.467µs, Maximum = 982.225µs, Average = 524.15µs
 ```
+
+## Client/server version
+In development
