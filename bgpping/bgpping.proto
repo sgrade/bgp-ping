@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "github.com/sgrade/bgp-ping/bgpping";
+
+package bgpping;
+
+// Interface exported by the server.
+service BgpPing {
+    rpc PingBgpPeer(BgpPingRequest) returns (BgpPingResponse) {}
+}
+
+message BgpPingRequest {
+    string peer_ip = 1;
+}
+
+message BgpPingResponse {
+    int32 probes_sent = 1;
+    int32 probes_successful = 2;
+    int32 probes_failed = 3;
+}
