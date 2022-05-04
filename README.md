@@ -1,9 +1,9 @@
 # bgp-ping
 Connectivity test for a BGP (Border Gateway Protocol) peer
 
-Original idea and some code to start from is from [https://github.com/cloverstd/tcping](https://github.com/cloverstd/tcping). Then it is being simplified for BGP and re-written as a client/server app.
+Original idea and some code to start from is from [https://github.com/cloverstd/tcping](https://github.com/cloverstd/tcping). It is being simplified for BGP and re-written as a client/server app.
 
-## Sample report of oririnal tcping and monolithic bgping
+## Sample report of monolithic bgp-ping (inherited from tcping)
 ```
 ./bgp-ping
 Ping tcp://10.0.12.11:179(10.0.12.11:179) - Connected - time=982.225µs
