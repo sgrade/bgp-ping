@@ -1,9 +1,25 @@
 # bgp-ping
-Connectivity test for a BGP (Border Gateway Protocol) peer
+Connectivity test for a BGP (Border Gateway Protocol) peer. 
 
-Original idea and some code to start from is from [https://github.com/cloverstd/tcping](https://github.com/cloverstd/tcping). It is being simplified for BGP and re-written as a client/server app.
+## What is in the repo
 
-## Sample report of monolithic bgp-ping (inherited from tcping)
+Two bgp-ping implementations:
+- Monolithic CLI app
+- Client/Server interacting through gRPC
+
+Two BIRD routers are integrated in the dev environment for easier testing. They start automatically, if the root bgpping folder is opened in [VS Code devcontainer](https://code.visualstudio.com/docs/remote/containers) and Docker Desktop is installed.
+
+## Monolith
+
+Currently it is a prototype, that pings 10.0.12.11:179 and accepts no parameters. Based on [cloverstd/tcping](https://github.com/cloverstd/tcping).
+
+### Build
+go build monolith/bgp-ping.go
+
+### Use
+`./bgp-ping.go`
+
+### Sample report (inherited from tcping)
 ```
 ./bgp-ping
 Ping tcp://10.0.12.11:179(10.0.12.11:179) - Connected - time=982.225µs
@@ -18,5 +34,11 @@ Approximate trip times:
         Minimum = 345.467µs, Maximum = 982.225µs, Average = 524.15µs
 ```
 
-## Client/server version
-In development
+## Client/server
+The prototype is in development
+
+### Server
+go run server/server.go
+
+### Client
+go run client/client.go

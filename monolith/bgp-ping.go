@@ -8,24 +8,23 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/sgrade/bgp-ping/ping"
+	"github.com/sgrade/bgp-ping/monolith/ping"
 )
 
 var (
-	showVersion bool
-	version     string
-	gitCommit   string
-	counter     int // ping counter
-	timeout     string
-	interval    string // interval in time.Duration format, e.g. "1s"
-	sigs        chan os.Signal
+	// showVersion bool
+	// version     string
+	// gitCommit   string
+	counter int // ping counter
+	// timeout  string
+	interval string // interval in time.Duration format, e.g. "1s"
+	sigs     chan os.Signal
 )
 
 func main() {
 
 	interval = "1s"
 	counter = 4
-	timeout = "1s"
 
 	sigs = make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -58,8 +57,7 @@ func main() {
 		Protocol: protocol,
 	}
 
-	var pinger ping.Pinger
-	pinger = ping.NewTCPing()
+	pinger := ping.NewTCPing()
 
 	pinger.SetTarget(&target)
 	pingerDone := pinger.Start()
