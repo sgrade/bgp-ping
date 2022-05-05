@@ -17,11 +17,10 @@ Currently it is a prototype, that pings 10.0.12.11:179 and accepts no parameters
 go build monolith/bgp-ping.go
 
 ### Use
-`./bgp-ping.go`
+`./bgp-ping`
 
 ### Sample report (inherited from tcping)
 ```
-./bgp-ping
 Ping tcp://10.0.12.11:179(10.0.12.11:179) - Connected - time=982.225µs
 Ping tcp://10.0.12.11:179(10.0.12.11:179) - Connected - time=345.467µs
 Ping tcp://10.0.12.11:179(10.0.12.11:179) - Connected - time=411.968µs
