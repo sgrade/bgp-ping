@@ -6,15 +6,24 @@ package bgpping;
 
 // Interface exported by the server.
 service BgpPing {
+    
+    // A simple RPC where the client sends a request to the server 
+    // using the stub and waits for a response to come back, 
+    // just like a normal function call.
     rpc PingBgpPeer(BgpPingRequest) returns (BgpPingResponse) {}
+
+    // A server-side streaming RPC where the client sends a request to the server 
+    // and gets a stream to read a sequence of messages back. 
+    rpc PingBgpPeerContinuously(BgpPingRequest) returns (BgpPingResponse) {}
 }
 
 message BgpPingRequest {
     string peer_ip = 1;
+    int64 stop_after_sending_count_requests = 2;
 }
 
 message BgpPingResponse {
-    int32 probes_sent = 1;
-    int32 probes_successful = 2;
-    int32 probes_failed = 3;
+    int64 probes_sent = 1;
+    int64 probes_successful = 2;
+    int64 probes_failed = 3;
 }

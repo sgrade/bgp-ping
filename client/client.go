@@ -34,10 +34,21 @@ func main() {
 
 	client := pb.NewBgpPingClient(conn)
 
+	// Simple RPC
 	r, err := client.PingBgpPeer(context.Background(), &pb.BgpPingRequest{PeerIp: *peerIpAddress})
 	if err != nil {
 		log.Fatalf("could not ping: %v", err)
 	}
-
+	fmt.Println("Simple RPC")
 	fmt.Println(r.ProbesSent, " probes sent,", r.ProbesSuccessful, "successful,", r.ProbesFailed, " failed.")
+
+	// Server-side streaming RPC
+	/*
+		rc, err := client.PingBgpPeerContinuously(context.Background(), &pb.BgpPingRequest{PeerIp: *peerIpAddress})
+		if err != nil {
+			log.Fatalf("could not ping: %v", err)
+		}
+		fmt.Println("Streaming RPC")
+		fmt.Println(rc.ProbesSent, " probes sent,", rc.ProbesSuccessful, "successful,", rc.ProbesFailed, " failed.")
+	*/
 }

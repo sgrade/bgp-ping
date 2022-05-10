@@ -100,6 +100,62 @@ func (s *bgpPingServer) PingBgpPeer(ctx context.Context, in *pb.BgpPingRequest) 
 	}, nil
 }
 
+func (s *bgpPingServer) PingBgpPeerContinuously(ctx context.Context, in *pb.BgpPingRequest) (*pb.BgpPingResponse, error) {
+
+	interval = "1s"
+
+	sigs = make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+
+	var timeoutDuration time.Duration
+	var intervalDuration time.Duration
+
+	if res, err := strconv.Atoi(interval); err == nil {
+		intervalDuration = time.Duration(res) * time.Millisecond
+	} else {
+		intervalDuration, err = time.ParseDuration(interval)
+		if err != nil {
+			fmt.Println("parse interval failed:\n", err)
+			// return
+			// TODO: handle an error properly
+		}
+	}
+
+	var protocol ping.Protocol
+
+	peerIpAddress := "10.0.12.11"
+	peerTcpPort := 179
+
+	parseHost, _ := ping.FormatIP(peerIpAddress)
+	target := ping.Target{
+		Timeout:  timeoutDuration,
+		Interval: intervalDuration,
+		Host:     parseHost,
+		Port:     peerTcpPort,
+		Counter:  s.stopAfterSendingCountRequests,
+		Protocol: protocol,
+	}
+
+	pinger := ping.NewBgpPing()
+
+	pinger.SetTarget(&target)
+	pingerDone := pinger.Start()
+	select {
+	case <-pingerDone:
+		break
+	case <-sigs:
+		break
+	}
+
+	// fmt.Println(pinger.Result())
+
+	return &pb.BgpPingResponse{
+		ProbesSent:       int64(pinger.Result().Counter),
+		ProbesSuccessful: int64(pinger.Result().SuccessCounter),
+		ProbesFailed:     int64(pinger.Result().Failed()),
+	}, nil
+}
+
 func main() {
 
 	flag.Parse()
@@ -132,10 +188,10 @@ func main() {
 		// closeDbConnections()
 	}()
 
-	// block until either OS signal, or server fatal error
+	// block until either OS signal, or server error
 	select {
 	case err := <-errChan:
-		log.Printf("Fatal error: %v\n", err)
+		log.Printf("Error: %v\n", err)
 	case s := <-stopChan:
 		log.Printf("\nGot signal %v, attempting graceful shutdown", s)
 	}
