@@ -39,5 +39,5 @@ func main() {
 		log.Fatalf("could not ping: %v", err)
 	}
 
-	fmt.Println(r.ProbesSent, r.ProbesSuccessful, r.ProbesFailed)
+	fmt.Println(r.ProbesSent, " probes sent,", r.ProbesSuccessful, "successful,", r.ProbesFailed, " failed.")
 }
