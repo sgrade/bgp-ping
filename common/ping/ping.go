@@ -52,7 +52,7 @@ type Target struct {
 	Port     int
 	Proxy    string
 
-	Counter  int
+	Counter  int64
 	Interval time.Duration
 	Timeout  time.Duration
 }
@@ -85,8 +85,8 @@ type Ping interface {
 
 // Result ...
 type Result struct {
-	Counter        int
-	SuccessCounter int
+	Counter        int64
+	SuccessCounter int64
 	Target         *Target
 
 	MinDuration   time.Duration
@@ -103,7 +103,7 @@ func (result Result) Avg() time.Duration {
 }
 
 // Failed return failed counter
-func (result Result) Failed() int {
+func (result Result) Failed() int64 {
 	return result.Counter - result.SuccessCounter
 }
 

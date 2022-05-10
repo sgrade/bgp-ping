@@ -19,17 +19,19 @@ import (
 )
 
 var (
-	port = flag.Int("port", 50051, "The server port")
+	port                          = flag.Int("port", 50051, "The BGP ping server port")
+	stopAfterSendingCountRequests = flag.Int64("count", 3, "Stop after sending count pings")
 )
 
 type bgpPingServer struct {
 	pb.UnimplementedBgpPingServer
 
-	peerIpAddress string
+	peerIpAddress                 string
+	stopAfterSendingCountRequests int64
 }
 
 func newBgpPingServer() *bgpPingServer {
-	s := &bgpPingServer{peerIpAddress: ""}
+	s := &bgpPingServer{peerIpAddress: "", stopAfterSendingCountRequests: int64(*stopAfterSendingCountRequests)}
 
 	return s
 }
@@ -37,8 +39,6 @@ func newBgpPingServer() *bgpPingServer {
 var (
 	// showVersion bool
 	// version     string
-	// gitCommit   string
-	counter int // ping counter
 	// timeout  string
 	interval string // interval in time.Duration format, e.g. "1s"
 	sigs     chan os.Signal
@@ -47,7 +47,6 @@ var (
 func (s *bgpPingServer) PingBgpPeer(ctx context.Context, in *pb.BgpPingRequest) (*pb.BgpPingResponse, error) {
 
 	interval = "1s"
-	counter = 4
 
 	sigs = make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -68,16 +67,16 @@ func (s *bgpPingServer) PingBgpPeer(ctx context.Context, in *pb.BgpPingRequest) 
 
 	var protocol ping.Protocol
 
-	host := "10.0.12.11"
-	port := 179
+	peerIpAddress := "10.0.12.11"
+	peerTcpPort := 179
 
-	parseHost, _ := ping.FormatIP(host)
+	parseHost, _ := ping.FormatIP(peerIpAddress)
 	target := ping.Target{
 		Timeout:  timeoutDuration,
 		Interval: intervalDuration,
 		Host:     parseHost,
-		Port:     port,
-		Counter:  counter,
+		Port:     peerTcpPort,
+		Counter:  s.stopAfterSendingCountRequests,
 		Protocol: protocol,
 	}
 
@@ -95,13 +94,14 @@ func (s *bgpPingServer) PingBgpPeer(ctx context.Context, in *pb.BgpPingRequest) 
 	fmt.Println(pinger.Result())
 
 	return &pb.BgpPingResponse{
-		ProbesSent:       int32(pinger.Result().Counter),
-		ProbesSuccessful: int32(pinger.Result().SuccessCounter),
-		ProbesFailed:     int32(pinger.Result().Failed()),
+		ProbesSent:       int64(pinger.Result().Counter),
+		ProbesSuccessful: int64(pinger.Result().SuccessCounter),
+		ProbesFailed:     int64(pinger.Result().Failed()),
 	}, nil
 }
 
 func main() {
+
 	flag.Parse()
 	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
 	if err != nil {
@@ -111,5 +111,32 @@ func main() {
 
 	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterBgpPingServer(grpcServer, newBgpPingServer())
-	grpcServer.Serve(lis)
+
+	// https://stackoverflow.com/questions/55797865/behavior-of-server-gracefulstop-in-golang
+	errChan := make(chan error)
+	stopChan := make(chan os.Signal, 1)
+
+	// bind OS events to the signal channel
+	signal.Notify(stopChan, syscall.SIGTERM, syscall.SIGINT)
+
+	// run blocking call in a separate goroutine, report errors via channel
+	go func() {
+		if err := grpcServer.Serve(lis); err != nil {
+			errChan <- err
+		}
+	}()
+
+	// terminate your environment gracefully before leaving main function
+	defer func() {
+		grpcServer.GracefulStop()
+		// closeDbConnections()
+	}()
+
+	// block until either OS signal, or server fatal error
+	select {
+	case err := <-errChan:
+		log.Printf("Fatal error: %v\n", err)
+	case s := <-stopChan:
+		log.Printf("\nGot signal %v, attempting graceful shutdown", s)
+	}
 }
