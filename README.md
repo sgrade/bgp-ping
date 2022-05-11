@@ -1,4 +1,4 @@
-NOTE: This is not a finished product, but a prototype to test some assumptions.
+NOTE: This is not a finished product, but a prototype to test assumptions.
 
 # bgp-ping
 Connectivity test for a BGP (Border Gateway Protocol) peer. 
